@@ -238,7 +238,47 @@ public:
             return -1.0f;
         }
         
-        // Simplified attack calculation - just return 1.0 for now
+        std::string attackType(type);
+        const Pokemon& defender = it->second;
+        
+        // Basic type effectiveness
+        if (attackType == "fire" && std::find(defender.types.begin(), defender.types.end(), "grass") != defender.types.end()) {
+            return 2.0f;
+        }
+        if (attackType == "fire" && std::find(defender.types.begin(), defender.types.end(), "water") != defender.types.end()) {
+            return 0.5f;
+        }
+        if (attackType == "water" && std::find(defender.types.begin(), defender.types.end(), "fire") != defender.types.end()) {
+            return 2.0f;
+        }
+        if (attackType == "water" && std::find(defender.types.begin(), defender.types.end(), "electric") != defender.types.end()) {
+            return 0.5f;
+        }
+        if (attackType == "electric" && std::find(defender.types.begin(), defender.types.end(), "water") != defender.types.end()) {
+            return 2.0f;
+        }
+        if (attackType == "electric" && std::find(defender.types.begin(), defender.types.end(), "grass") != defender.types.end()) {
+            return 0.5f;
+        }
+        if (attackType == "grass" && std::find(defender.types.begin(), defender.types.end(), "water") != defender.types.end()) {
+            return 2.0f;
+        }
+        if (attackType == "grass" && std::find(defender.types.begin(), defender.types.end(), "fire") != defender.types.end()) {
+            return 0.5f;
+        }
+        if (attackType == "ice" && std::find(defender.types.begin(), defender.types.end(), "grass") != defender.types.end()) {
+            return 2.0f;
+        }
+        if (attackType == "ice" && std::find(defender.types.begin(), defender.types.end(), "fighting") != defender.types.end()) {
+            return 0.5f;
+        }
+        if (attackType == "fighting" && std::find(defender.types.begin(), defender.types.end(), "ice") != defender.types.end()) {
+            return 2.0f;
+        }
+        if (attackType == "fighting" && std::find(defender.types.begin(), defender.types.end(), "normal") != defender.types.end()) {
+            return 0.5f;
+        }
+        
         return 1.0f;
     }
 
@@ -247,8 +287,42 @@ public:
             return 0;
         }
         
-        // Simplified catch calculation - just return 1 for now
-        return 1;
+        // Start with smallest id pokemon
+        std::set<int> ownedPokemon;
+        ownedPokemon.insert(pokemonMap.begin()->first);
+        
+        bool newPokemonCaught = true;
+        while (newPokemonCaught) {
+            newPokemonCaught = false;
+            
+            for (const auto& pair : pokemonMap) {
+                int targetId = pair.first;
+                const Pokemon& target = pair.second;
+                
+                if (ownedPokemon.find(targetId) != ownedPokemon.end()) {
+                    continue;
+                }
+                
+                // Check if any owned pokemon can catch this target
+                for (int ownedId : ownedPokemon) {
+                    const Pokemon& attacker = pokemonMap.at(ownedId);
+                    
+                    for (const auto& attackType : attacker.types) {
+                        float damage = attack(attackType.c_str(), targetId);
+                        
+                        if (damage >= 2.0f) {
+                            ownedPokemon.insert(targetId);
+                            newPokemonCaught = true;
+                            break;
+                        }
+                    }
+                    
+                    if (newPokemonCaught) break;
+                }
+            }
+        }
+        
+        return ownedPokemon.size();
     }
 
     struct iterator {
