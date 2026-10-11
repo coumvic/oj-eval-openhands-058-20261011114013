@@ -36,15 +36,6 @@ struct Pokemon {
     char name[12];
     int id;
     std::vector<std::string> types;
-    
-    Pokemon() : id(0) {
-        name[0] = '\0';
-    }
-    
-    Pokemon(const char* _name, int _id, const std::vector<std::string>& _types) : id(_id), types(_types) {
-        strncpy(name, _name, 11);
-        name[11] = '\0';
-    }
 };
 
 class Pokedex {
@@ -57,7 +48,7 @@ private:
     
     void initializeTypeEffectiveness() {
         // Initialize all to 1.0 (neutral)
-        std::vector<std::string> types = {"normal", "fire", "water", "electric", "grass", "ice", "fighting", "ground", "flying"};
+        std::vector<std::string> types = {"normal", "fire", "water", "electric", "grass", "ice", "fighting"};
         for (const auto& attacker : types) {
             for (const auto& defender : types) {
                 typeEffectiveness[attacker][defender] = 1.0f;
@@ -73,10 +64,9 @@ private:
         typeEffectiveness["water"]["fire"] = 2.0f;
         typeEffectiveness["water"]["electric"] = 0.5f;
         
-        // Electric strong against water (2x), weak against grass (0.5x), no effect against ground (0x)
+        // Electric strong against water (2x), weak against grass (0.5x)
         typeEffectiveness["electric"]["water"] = 2.0f;
         typeEffectiveness["electric"]["grass"] = 0.5f;
-        typeEffectiveness["electric"]["ground"] = 0.0f;
         
         // Grass strong against water (2x), weak against fire (0.5x)
         typeEffectiveness["grass"]["water"] = 2.0f;
@@ -89,9 +79,6 @@ private:
         // Fighting strong against ice (2x), weak against normal (0.5x)
         typeEffectiveness["fighting"]["ice"] = 2.0f;
         typeEffectiveness["fighting"]["normal"] = 0.5f;
-        
-        // Ground no effect against flying (0x)
-        typeEffectiveness["ground"]["flying"] = 0.0f;
     }
     
     bool isValidName(const char* name) {
@@ -103,7 +90,7 @@ private:
     }
     
     bool isValidType(const std::string& type) const {
-        std::set<std::string> validTypes = {"normal", "fire", "water", "electric", "grass", "ice", "fighting", "ground", "flying"};
+        std::set<std::string> validTypes = {"normal", "fire", "water", "electric", "grass", "ice", "fighting"};
         return validTypes.find(type) != validTypes.end();
     }
     
@@ -163,7 +150,12 @@ private:
             
             try {
                 std::vector<std::string> types = parseTypes(typesStr.c_str());
-                pokemonMap[id] = Pokemon(name.c_str(), id, types);
+                Pokemon pm;
+                strncpy(pm.name, name.c_str(), 11);
+                pm.name[11] = '\0';
+                pm.id = id;
+                pm.types = types;
+                pokemonMap[id] = pm;
             } catch (...) {
                 // Skip invalid entries during file loading
             }
@@ -205,7 +197,12 @@ public:
             std::vector<std::string> typeList = parseTypes(types);
             
             // Add pokemon
-            pokemonMap[id] = Pokemon(name, id, typeList);
+            Pokemon pm;
+            strncpy(pm.name, name, 11);
+            pm.name[11] = '\0';
+            pm.id = id;
+            pm.types = typeList;
+            pokemonMap[id] = pm;
             return true;
             
         } catch (ArgumentException& e) {
