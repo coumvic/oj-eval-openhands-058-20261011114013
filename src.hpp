@@ -57,14 +57,14 @@ private:
     
     void initializeTypeEffectiveness() {
         // Initialize all to 1.0 (neutral)
-        std::vector<std::string> types = {"normal", "fire", "water", "electric", "grass", "ice", "fighting"};
+        std::vector<std::string> types = {"normal", "fire", "water", "electric", "grass", "ice", "fighting", "ground", "flying"};
         for (const auto& attacker : types) {
             for (const auto& defender : types) {
                 typeEffectiveness[attacker][defender] = 1.0f;
             }
         }
         
-        // Set up effectiveness relationships
+        // Set up effectiveness relationships based on problem description
         // Fire strong against grass (2x), weak against water (0.5x)
         typeEffectiveness["fire"]["grass"] = 2.0f;
         typeEffectiveness["fire"]["water"] = 0.5f;
@@ -89,6 +89,9 @@ private:
         // Fighting strong against ice (2x), weak against normal (0.5x)
         typeEffectiveness["fighting"]["ice"] = 2.0f;
         typeEffectiveness["fighting"]["normal"] = 0.5f;
+        
+        // Ground no effect against flying (0x)
+        typeEffectiveness["ground"]["flying"] = 0.0f;
     }
     
     bool isValidName(const char* name) {
@@ -100,7 +103,7 @@ private:
     }
     
     bool isValidType(const std::string& type) const {
-        std::set<std::string> validTypes = {"normal", "fire", "water", "electric", "grass", "ice", "fighting"};
+        std::set<std::string> validTypes = {"normal", "fire", "water", "electric", "grass", "ice", "fighting", "ground", "flying"};
         return validTypes.find(type) != validTypes.end();
     }
     
